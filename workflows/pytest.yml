@@ -1,0 +1,32 @@
+name: Python tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov
+      - name: Run tests
+        env:
+          ENV: test
+          SECRET_KEY: test-secret
+          DATABASE: sqlite:///./test_test.db
+        run: |
+          pytest -q --junitxml=tests/junit_report.xml
+      - name: Upload junit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-report
+          path: tests/junit_report.xml
